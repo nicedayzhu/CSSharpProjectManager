@@ -1,6 +1,21 @@
-﻿namespace CSSharpProjectManager.ViewModels;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using CSSharpProjectManager.Views;
+
+namespace CSSharpProjectManager.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
-    public string Greeting { get; } = "Welcome to Avalonia!";
+    [ObservableProperty]
+    private WorkspaceViewModel _workspace = new();
+
+    [RelayCommand]
+    private void CreateNewProject()
+    {
+        var newProjectWindow = new NewProjectWindow
+        {
+            DataContext = new NewProjectViewModel(Workspace.WorkspacePath)
+        };
+        newProjectWindow.Show();
+    }
 }

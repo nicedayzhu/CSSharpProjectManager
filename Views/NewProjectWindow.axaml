@@ -1,0 +1,24 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:CSSharpProjectManager.ViewModels"
+        mc:Ignorable="d"
+        x:Class="CSSharpProjectManager.Views.NewProjectWindow"
+        x:DataType="vm:NewProjectViewModel"
+        Title="创建新项目"
+        Width="500" Height="300">
+    <Design.DataContext>
+        <vm:NewProjectViewModel />
+    </Design.DataContext>
+
+    <StackPanel Margin="20" Spacing="20">
+        <TextBox Text="{Binding ProjectName, Mode=TwoWay}" 
+                 Watermark="项目名称"/>
+        <TextBox Text="{Binding ProjectPath, Mode=TwoWay}" 
+                 Watermark="项目路径"/>
+        <Button Content="创建项目" 
+                Command="{Binding CreateProjectCommand}"
+                HorizontalAlignment="Right"/>
+    </StackPanel>
+</Window>

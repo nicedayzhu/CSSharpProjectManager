@@ -1,20 +1,38 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:CSSharpProjectManager.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        xmlns:vm="using:CSSharpProjectManager.ViewModels"
+        mc:Ignorable="d"
         x:Class="CSSharpProjectManager.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="CSSharpProjectManager">
-
+        Title="CSSharp Project Manager"
+        Width="800" Height="600">
     <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-        <vm:MainWindowViewModel/>
+        <vm:MainWindowViewModel />
     </Design.DataContext>
 
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    <StackPanel Margin="20" Spacing="20">
+        <!-- 工作区路径设置 -->
+        <StackPanel Spacing="10">
+            <TextBlock Text="工作区路径:" FontSize="16"/>
+            <DockPanel LastChildFill="True">
+                <Button DockPanel.Dock="Right" 
+                        Content="选择文件夹" 
+                        Command="{Binding Workspace.SelectWorkspacePathCommand}"
+                        Margin="10,0,0,0"
+                        Width="100"/>
+                <TextBox Text="{Binding Workspace.WorkspacePath, Mode=TwoWay}" 
+                         IsReadOnly="True"
+                         Watermark="请选择工作区目录"/>
+            </DockPanel>
+        </StackPanel>
 
+        <!-- 创建项目按钮 -->
+        <Button Content="创建新项目" 
+                Command="{Binding CreateNewProjectCommand}"
+                HorizontalAlignment="Left"
+                Padding="20,5"/>
+    </StackPanel>
 </Window>
