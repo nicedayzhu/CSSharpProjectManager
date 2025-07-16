@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSSharpProjectManager", "CSSharpProjectManager.csproj", "{DA20C5A8-0958-464C-B6EA-8FF6E7E5AEBC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DA20C5A8-0958-464C-B6EA-8FF6E7E5AEBC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA20C5A8-0958-464C-B6EA-8FF6E7E5AEBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA20C5A8-0958-464C-B6EA-8FF6E7E5AEBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA20C5A8-0958-464C-B6EA-8FF6E7E5AEBC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
