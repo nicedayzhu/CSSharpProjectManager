@@ -55,6 +55,11 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void ShowCreateProject()
     {
+        if (string.IsNullOrWhiteSpace(Workspace.WorkspacePath))
+        {
+            ShowMessage("请先设置工作区路径，再创建新项目！");
+            return;
+        }
         if (!CheckDotnetSdkInstalled())
         {
             MessageBoxManager.GetMessageBoxStandard(
@@ -65,9 +70,14 @@ public partial class MainWindowViewModel : ViewModelBase
             ).ShowAsync();
             return;
         }
-        if (string.IsNullOrWhiteSpace(Workspace.WorkspacePath))
+        if (!IsCounterStrikeSharpTemplatesInstalled())
         {
-            ShowMessage("请先设置工作区路径，再创建新项目！");
+            MessageBoxManager.GetMessageBoxStandard(
+                "缺少 CounterStrikeSharp 模板",
+                "未检测到 CounterStrikeSharpTemplates 模板，请先运行如下命令安装：\n\ndotnet new install CounterStrikeSharpTemplates",
+                ButtonEnum.Ok,
+                Icon.Error
+            ).ShowAsync();
             return;
         }
         NewProjectVM = new NewProjectViewModel { WorkspacePath = Workspace.WorkspacePath };
@@ -152,6 +162,34 @@ public partial class MainWindowViewModel : ViewModelBase
             process.WaitForExit();
             // 只要有输出，说明有SDK
             return process.ExitCode == 0 && !string.IsNullOrWhiteSpace(output);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static bool IsCounterStrikeSharpTemplatesInstalled()
+    {
+        try
+        {
+            var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "dotnet",
+                    Arguments = "new list CounterStrikeSharpTemplates",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                }
+            };
+            process.Start();
+            var output = process.StandardOutput.ReadToEnd();
+            process.WaitForExit();
+            // 检查输出中是否包含模板包名
+            return output.Contains("CounterStrikeSharpTemplates", StringComparison.OrdinalIgnoreCase);
         }
         catch
         {
