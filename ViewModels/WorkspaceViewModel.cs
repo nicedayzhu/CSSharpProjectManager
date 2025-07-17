@@ -13,6 +13,13 @@ public partial class WorkspaceViewModel : ViewModelBase
     [ObservableProperty]
     private string? _workspacePath;
 
+    public bool IsWorkspacePathSet => !string.IsNullOrWhiteSpace(WorkspacePath);
+
+    partial void OnWorkspacePathChanged(string? value)
+    {
+        OnPropertyChanged(nameof(IsWorkspacePathSet));
+    }
+
     [RelayCommand]
     private async Task SelectWorkspacePath()
     {

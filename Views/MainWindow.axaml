@@ -3,6 +3,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:CSSharpProjectManager.ViewModels"
+        xmlns:converters="using:CSSharpProjectManager.Converters"
         mc:Ignorable="d"
         x:Class="CSSharpProjectManager.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
@@ -22,17 +23,60 @@
                         Content="选择文件夹" 
                         Command="{Binding Workspace.SelectWorkspacePathCommand}"
                         Margin="10,0,0,0"
-                        Width="100"/>
+                        Width="100"
+                        IsEnabled="{Binding Workspace.IsWorkspacePathSet, Converter={StaticResource InverseBooleanConverter}}"/>
                 <TextBox Text="{Binding Workspace.WorkspacePath, Mode=TwoWay}" 
-                         IsReadOnly="True"
+                         IsReadOnly="{Binding Workspace.IsWorkspacePathSet}"
                          Watermark="请选择工作区目录"/>
             </DockPanel>
         </StackPanel>
 
-        <!-- 创建项目按钮 -->
-        <Button Content="创建新项目" 
-                Command="{Binding CreateNewProjectCommand}"
-                HorizontalAlignment="Left"
-                Padding="20,5"/>
+        <!-- 新建项目表单区 -->
+        <StackPanel>
+            <!-- 创建新项目按钮 -->
+            <Button Content="创建新项目"
+                    Command="{Binding ShowCreateProjectCommand}"
+                    HorizontalAlignment="Left"
+                    Padding="20,5"
+                    IsVisible="{Binding IsCreatingProject, Converter={StaticResource InverseBooleanConverter}}"/>
+            <!-- 多步表单 -->
+            <StackPanel IsVisible="{Binding IsCreatingProject}">
+                <!-- 步骤1：基本信息 -->
+                <StackPanel IsVisible="{Binding CurrentStep, Converter={StaticResource StepEqualsConverter}, ConverterParameter=0}" Spacing="15">
+                    <TextBlock Text="项目名称"/>
+                    <TextBox Text="{Binding NewProjectVM.ProjectName, Mode=TwoWay}" Watermark="输入项目名称"/>
+                    <TextBlock Text="项目路径"/>
+                    <TextBox Text="{Binding NewProjectVM.ProjectPath, Mode=OneWay}" IsReadOnly="True" Foreground="#a0a0a0" Watermark="路径将自动生成"/>
+                    <CheckBox Content="包含 GitHub 集成 (--g)" IsChecked="{Binding NewProjectVM.IncludeGitHubIntegration}"/>
+                </StackPanel>
+                <!-- 步骤2：模板选择 -->
+                <StackPanel IsVisible="{Binding CurrentStep, Converter={StaticResource StepEqualsConverter}, ConverterParameter=1}" Spacing="10">
+                    <TextBlock Text="选择模板类型" FontWeight="Bold"/>
+                    <RadioButton Content="Default - 基础插件模板"
+                                 IsChecked="{Binding NewProjectVM.SelectedTemplate, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:NewProjectViewModel+TemplateType.Default}}"/>
+                    <RadioButton Content="Config - 包含配置的插件"
+                                 IsChecked="{Binding NewProjectVM.SelectedTemplate, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:NewProjectViewModel+TemplateType.Config}}"/>
+                    <RadioButton Content="Lang - 包含多语言的插件"
+                                 IsChecked="{Binding NewProjectVM.SelectedTemplate, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:NewProjectViewModel+TemplateType.Lang}}"/>
+                    <RadioButton Content="ConfigLang - 包含配置和多语言的插件"
+                                 IsChecked="{Binding NewProjectVM.SelectedTemplate, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:NewProjectViewModel+TemplateType.ConfigLang}}"/>
+                    <RadioButton Content="DataMySql - 包含MySQL数据库的插件"
+                                 IsChecked="{Binding NewProjectVM.SelectedTemplate, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:NewProjectViewModel+TemplateType.DataMySql}}"/>
+                    <Border Background="#1e1e2e" CornerRadius="5" Padding="15" Margin="0,15">
+                        <TextBlock Text="{Binding NewProjectVM.SelectedTemplate, Converter={StaticResource TemplateDescriptionConverter}}"
+                                   TextWrapping="Wrap"
+                                   Foreground="#e0e0e0"
+                                   FontSize="14"/>
+                    </Border>
+                </StackPanel>
+                <!-- 步骤按钮 -->
+                <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right" Margin="0,20,0,0">
+                    <Button Content="取消" Command="{Binding CancelCreateProjectCommand}" Width="100"/>
+                    <Button Content="上一步" Command="{Binding PreviousStepCommand}" Width="100" IsVisible="{Binding CurrentStep, Converter={StaticResource StepEqualsConverter}, ConverterParameter=1}"/>
+                    <Button Content="下一步" Command="{Binding NextStepCommand}" Width="100" IsVisible="{Binding CurrentStep, Converter={StaticResource StepEqualsConverter}, ConverterParameter=0}"/>
+                    <Button Content="完成" Command="{Binding FinishCreateProjectCommand}" Width="150" IsVisible="{Binding CurrentStep, Converter={StaticResource StepEqualsConverter}, ConverterParameter=1}"/>
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
     </StackPanel>
 </Window>

@@ -16,5 +16,7 @@
      <Application.Resources>
          <converters:EnumToBooleanConverter x:Key="EnumToBooleanConverter"/>
          <converters:TemplateDescriptionConverter x:Key="TemplateDescriptionConverter"/>
+         <converters:StepEqualsConverter x:Key="StepEqualsConverter"/>
+         <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
      </Application.Resources>
 </Application>

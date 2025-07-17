@@ -12,37 +12,92 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private WorkspaceViewModel _workspace = new();
 
-    [RelayCommand]
-    // private void CreateNewProject()
-    // {
-    //     var newProjectWindow = new NewProjectWindow
-    //     {
-    //         DataContext = new NewProjectViewModel(Workspace.WorkspacePath)
-    //     };
-    //     newProjectWindow.Show();
-    // }
-    private async Task CreateNewProject()
+    [ObservableProperty]
+    private bool _isCreatingProject;
+
+    [ObservableProperty]
+    private NewProjectViewModel? _newProjectVM;
+
+    [ObservableProperty]
+    private int _currentStep;
+
+    public IRelayCommand ShowCreateProjectCommand { get; }
+    public IRelayCommand NextStepCommand { get; }
+    public IRelayCommand PreviousStepCommand { get; }
+    public IRelayCommand CancelCreateProjectCommand { get; }
+    public IRelayCommand FinishCreateProjectCommand { get; }
+
+    public MainWindowViewModel()
+    {
+        ShowCreateProjectCommand = new RelayCommand(ShowCreateProject);
+        NextStepCommand = new RelayCommand(NextStep, CanNextStep);
+        PreviousStepCommand = new RelayCommand(PreviousStep, () => CurrentStep > 0);
+        CancelCreateProjectCommand = new RelayCommand(CancelCreateProject);
+        FinishCreateProjectCommand = new RelayCommand(async () => await FinishCreateProject(), CanFinish);
+        CurrentStep = 0;
+    }
+
+    private void ShowCreateProject()
     {
         if (string.IsNullOrWhiteSpace(Workspace.WorkspacePath))
         {
-            // ✅ 新版本 API
-            var messageBox = MessageBoxManager.GetMessageBoxStandard(
-                title: "提示",
-                text: "请先设置工作区路径，再创建新项目！",
-                @enum: ButtonEnum.Ok,
-                icon: Icon.Warning
-            );
-            var result = await messageBox.ShowAsync();// 异步显示弹窗
+            ShowMessage("请先设置工作区路径，再创建新项目！");
             return;
         }
-
-        var newProjectWindow = new NewProjectWindow
+        NewProjectVM = new NewProjectViewModel { WorkspacePath = Workspace.WorkspacePath };
+        // 监听ProjectName变化，刷新下一步按钮可用状态
+        NewProjectVM.PropertyChanged += (s, e) =>
         {
-            DataContext = new NewProjectViewModel
+            if (e.PropertyName == nameof(NewProjectVM.ProjectName))
             {
-                WorkspacePath = Workspace.WorkspacePath
+                NextStepCommand.NotifyCanExecuteChanged();
             }
         };
-        newProjectWindow.Show();
+        IsCreatingProject = true;
+        CurrentStep = 0;
+    }
+
+    private void NextStep()
+    {
+        if (CurrentStep < 1) CurrentStep++;
+    }
+    private bool CanNextStep() => CurrentStep == 0 && NewProjectVM != null && !string.IsNullOrWhiteSpace(NewProjectVM.ProjectName);
+    private void PreviousStep()
+    {
+        if (CurrentStep > 0) CurrentStep--;
+    }
+    private void CancelCreateProject()
+    {
+        IsCreatingProject = false;
+        NewProjectVM = null;
+        CurrentStep = 0;
+    }
+    private bool CanFinish() => CurrentStep == 1 && NewProjectVM != null;
+    private async Task FinishCreateProject()
+    {
+        if (NewProjectVM != null)
+        {
+            await NewProjectVM.CreateProjectCommand.ExecuteAsync(null);
+            IsCreatingProject = false;
+            NewProjectVM = null;
+            CurrentStep = 0;
+        }
+    }
+    private async void ShowMessage(string message)
+    {
+        var messageBox = MessageBoxManager.GetMessageBoxStandard(
+            title: "提示",
+            text: message,
+            @enum: ButtonEnum.Ok,
+            icon: Icon.Warning
+        );
+        await messageBox.ShowAsync();
+    }
+
+    partial void OnCurrentStepChanged(int value)
+    {
+        NextStepCommand.NotifyCanExecuteChanged();
+        PreviousStepCommand.NotifyCanExecuteChanged();
+        FinishCreateProjectCommand.NotifyCanExecuteChanged();
     }
 }
