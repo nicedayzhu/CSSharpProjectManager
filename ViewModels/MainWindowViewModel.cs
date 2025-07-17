@@ -21,6 +21,9 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private int _currentStep;
 
+    [ObservableProperty]
+    private bool _isCreating;
+
     public IRelayCommand ShowCreateProjectCommand { get; }
     public IRelayCommand NextStepCommand { get; }
     public IRelayCommand PreviousStepCommand { get; }
@@ -72,12 +75,16 @@ public partial class MainWindowViewModel : ViewModelBase
         NewProjectVM = null;
         CurrentStep = 0;
     }
-    private bool CanFinish() => CurrentStep == 1 && NewProjectVM != null;
+    private bool CanFinish() => CurrentStep == 1 && NewProjectVM != null && !IsCreating;
     private async Task FinishCreateProject()
     {
         if (NewProjectVM != null)
         {
+            IsCreating = true;
+            FinishCreateProjectCommand.NotifyCanExecuteChanged();
             await NewProjectVM.CreateProjectCommand.ExecuteAsync(null);
+            IsCreating = false;
+            FinishCreateProjectCommand.NotifyCanExecuteChanged();
             IsCreatingProject = false;
             NewProjectVM = null;
             CurrentStep = 0;
