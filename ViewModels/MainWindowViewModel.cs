@@ -53,7 +53,7 @@ public partial class MainWindowViewModel : ViewModelBase
         IsCreatingProject = false; // 确保默认是false
     }
 
-    private void ShowCreateProject()
+    private async void ShowCreateProject()
     {
         if (string.IsNullOrWhiteSpace(Workspace.WorkspacePath))
         {
@@ -62,7 +62,7 @@ public partial class MainWindowViewModel : ViewModelBase
         }
         if (!CheckDotnetSdkInstalled())
         {
-            MessageBoxManager.GetMessageBoxStandard(
+            await MessageBoxManager.GetMessageBoxStandard(
                 "缺少 .NET SDK",
                 "未检测到 .NET SDK 环境，请前往官网下载并安装！\n\nhttps://dotnet.microsoft.com/download",
                 ButtonEnum.Ok,
@@ -72,13 +72,54 @@ public partial class MainWindowViewModel : ViewModelBase
         }
         if (!IsCounterStrikeSharpTemplatesInstalled())
         {
-            MessageBoxManager.GetMessageBoxStandard(
+            var result = await MessageBoxManager.GetMessageBoxStandard(
                 "缺少 CounterStrikeSharp 模板",
-                "未检测到 CounterStrikeSharpTemplates 模板，请先运行如下命令安装：\n\ndotnet new install CounterStrikeSharpTemplates",
-                ButtonEnum.Ok,
-                Icon.Error
+                "未检测到 CounterStrikeSharpTemplates 模板，是否自动为您安装？\n\n（如拒绝，请手动运行：dotnet new install CounterStrikeSharpTemplates）",
+                ButtonEnum.YesNo,
+                Icon.Question
             ).ShowAsync();
-            return;
+
+            if (result == ButtonResult.Yes)
+            {
+                // 弹出安装进度窗口
+                bool installSuccess = false;
+                var progressWindow = new InstallProgressWindow();
+                var vm = new InstallProgressViewModel(() => progressWindow.Close());
+                progressWindow.DataContext = vm;
+                var installTask = vm.InstallTemplateAsync();
+                progressWindow.ShowDialog(App.MainWindow);
+                installSuccess = await installTask;
+
+                if (installSuccess && IsCounterStrikeSharpTemplatesInstalled())
+                {
+                    await MessageBoxManager.GetMessageBoxStandard(
+                        "安装成功",
+                        "CounterStrikeSharpTemplates 模板已成功安装！",
+                        ButtonEnum.Ok,
+                        Icon.Success
+                    ).ShowAsync();
+                }
+                else
+                {
+                    await MessageBoxManager.GetMessageBoxStandard(
+                        "安装失败",
+                        "自动安装失败，请手动运行：dotnet new install CounterStrikeSharpTemplates",
+                        ButtonEnum.Ok,
+                        Icon.Error
+                    ).ShowAsync();
+                    return;
+                }
+            }
+            else
+            {
+                await MessageBoxManager.GetMessageBoxStandard(
+                    "缺少 CounterStrikeSharp 模板",
+                    "请先运行如下命令安装模板：\n\ndotnet new install CounterStrikeSharpTemplates",
+                    ButtonEnum.Ok,
+                    Icon.Error
+                ).ShowAsync();
+                return;
+            }
         }
         NewProjectVM = new NewProjectViewModel { WorkspacePath = Workspace.WorkspacePath };
         // 监听ProjectName变化，刷新下一步按钮可用状态
@@ -190,6 +231,32 @@ public partial class MainWindowViewModel : ViewModelBase
             process.WaitForExit();
             // 检查输出中是否包含模板包名
             return output.Contains("CounterStrikeSharpTemplates", StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static bool InstallCounterStrikeSharpTemplates()
+    {
+        try
+        {
+            var process = new System.Diagnostics.Process
+            {
+                StartInfo = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = "dotnet",
+                    Arguments = "new install CounterStrikeSharpTemplates",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                }
+            };
+            process.Start();
+            process.WaitForExit();
+            return process.ExitCode == 0;
         }
         catch
         {

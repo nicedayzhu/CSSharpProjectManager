@@ -1,0 +1,16 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:CSSharpProjectManager.ViewModels"
+        mc:Ignorable="d"
+        x:Class="CSSharpProjectManager.Views.InstallProgressWindow"
+        x:DataType="vm:InstallProgressViewModel"
+        Width="600" Height="400"
+        Title="安装模板进度">
+    <StackPanel Margin="20" Spacing="10">
+        <TextBlock Text="正在安装 CounterStrikeSharpTemplates..." FontWeight="Bold" FontSize="16"/>
+        <TextBox Text="{Binding Log, Mode=OneWay}" AcceptsReturn="True" IsReadOnly="True" Height="260"/>
+        <Button Content="关闭" Command="{Binding CloseCommand}" IsVisible="{Binding CanClose}" Width="100" HorizontalAlignment="Right"/>
+    </StackPanel>
+</Window> 
