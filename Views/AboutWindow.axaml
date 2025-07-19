@@ -1,0 +1,19 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="CSSharpProjectManager.Views.AboutWindow"
+        Width="400" Height="360"
+        Title="关于"
+        WindowStartupLocation="CenterOwner">
+    <StackPanel Margin="24" Spacing="16">
+        <Image Source="/Assets/avalonia-logo.ico" Width="64" Height="64" HorizontalAlignment="Center"/>
+        <TextBlock Text="CSSharp Project Manager" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center"/>
+        <TextBlock Text="Version: 1.0.0" FontSize="14" HorizontalAlignment="Center" Name="VersionText"/>
+        <Button Content="复制版本号" Click="OnCopyVersionClicked" HorizontalAlignment="Center" Width="120"/>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10">
+            <Button Content="网站" Click="OnWebsiteClicked"/>
+            <Button Content="GitHub" Click="OnGitHubClicked"/>
+        </StackPanel>
+        <TextBlock Text="作者：我不当学长" FontSize="13" HorizontalAlignment="Center"/>
+        <TextBlock Text="本项目与Valve无关，仅供学习交流。" FontSize="12" Foreground="#888" HorizontalAlignment="Center"/>
+    </StackPanel>
+</Window> 
